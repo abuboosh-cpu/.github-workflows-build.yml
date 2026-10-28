@@ -1,0 +1,35 @@
+name: build-reghack-mipsel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install MIPS cross-compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-mipsel-linux-gnu
+
+      - name: Download reghack source
+        run: |
+          wget https://raw.githubusercontent.com/drizzt/reghack/master/reghack.c
+
+      - name: Compile static MIPS little-endian binary
+        run: |
+          mipsel-linux-gnu-gcc -O2 -static reghack.c -o reghack.mipsel.elf
+          ls -la reghack.mipsel.elf
+
+      - name: Commit binary to repo
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "github-actions"
+          git add reghack.mipsel.elf
+          git commit -m "Build reghack for mipsel (MT7621)"
+          git push
